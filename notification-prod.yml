@@ -1,0 +1,64 @@
+# notification servisi — PRODUCTION override
+
+spring:
+  datasource:
+    # Prod DB credentials encrypt edilmeli (TODO Faz 6 {cipher} workflow)
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?currentSchema=notification
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}    # TODO Faz 6: '{cipher}...' encrypt et
+
+  jpa:
+    hibernate:
+      # Prod: schema sadece validate edilir; auto-update YASAK
+      ddl-auto: validate
+    defer-datasource-initialization: false
+
+  sql:
+    init:
+      mode: never
+
+  # SMTP — prod'da gerçek mail provider (SendGrid/Mailgun/SMTP relay)
+  mail:
+    host: ${MAIL_HOST:smtp.sendgrid.net}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:apikey}
+    password: ${MAIL_PASSWORD}    # TODO Faz 6: '{cipher}...'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# Prod JWT secret env var'dan; Faz 6'da {cipher} ile encrypt edilecek
+jwt:
+  secret: ${JWT_SECRET}    # TODO Faz 6: '{cipher}...'
+
+# Prod'da mail send default açık (mail.enabled=true)
+mail:
+  enabled: ${MAIL_ENABLED:true}
+  from: ${MAIL_FROM:noreply@sedcore.com}
+
+# Prod Slack webhook (Faz 6'da {cipher})
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL}
+
+# Twilio SMS + WhatsApp prod credentials (TODO Faz 6 {cipher})
+notification:
+  sms:
+    provider: ${NOTIFICATION_SMS_PROVIDER:noop}
+  whatsapp:
+    provider: ${NOTIFICATION_WHATSAPP_PROVIDER:noop}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID}    # TODO Faz 6: '{cipher}...'
+  auth-token: ${TWILIO_AUTH_TOKEN}      # TODO Faz 6: '{cipher}...'
+  from-phone: ${TWILIO_PHONE_NUMBER}
+  whatsapp-from: ${TWILIO_WHATSAPP_NUMBER}
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    com.sedcore.notification: INFO

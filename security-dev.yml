@@ -1,0 +1,33 @@
+# security servisi — DEV profile override
+# Developer makinesi: localhost Postgres, fresh schema, full SQL trace, seed data
+# Aktivasyon: SPRING_PROFILES_ACTIVE=dev veya --spring.profiles.active=dev
+
+spring:
+  # K7 (2026-05-27): Dev DB hardcoded — env-var pattern yok, plaintext OK
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ekalem
+    username: ekalem
+    password: ekalem
+
+  jpa:
+    hibernate:
+      # Her başlatmada tablo recreate (data.sql seed yeniden yüklenir)
+      ddl-auto: create
+    # data.sql Hibernate schema oluşturduktan SONRA çalışır
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      # Her boot'ta data.sql çalışır (admin/admin123 + i18n + role tanımları)
+      mode: always
+
+# Dev JWT — security ile api-manager arasında aynı değer (imza eşleşmesi).
+# api-manager-dev.yml base'inden bu değeri default olarak alır.
+jwt:
+  secret: BuCokGizliVeUzunBirAnahtarOlmalidir12345!
+
+# Dev: SQL trace + bind parameter log — sorgu performans tanılaması için
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

@@ -1,0 +1,71 @@
+# api-manager — Spring Cloud Gateway, JWT decode, CORS, multi-tenant header inject
+# Base config: dev default routes localhost'ta. Prod override container DNS'i kullanır.
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-manager   # config-repo'da api-manager.yml ile eşleşir
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              "[/**]":
+                # localhost:* → Flutter web / React dev / Vite tüm portlar
+                # Production domain'leri prod'da da geçerli (CORS env-agnostic)
+                allowedOriginPatterns:
+                  - "http://localhost:*"
+                  - "https://www.sedcore.com"
+                  - "https://www.bertspot.com"
+                  - "https://leostok.me"
+                  - "https://www.leostok.me"
+                allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+                allowedHeaders: "*"
+                exposedHeaders:
+                  - Authorization
+                  - X-User-Info
+                  - X-Company-Code
+                allowCredentials: true
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+          routes:
+            # Base routes = dev default (localhost). Prod yml override eder (container DNS).
+            - id: security-service
+              uri: http://localhost:8002
+              predicates:
+                - Path=/security/**
+
+            - id: product-service-public
+              uri: http://localhost:8001
+              predicates:
+                - Path=/product/api/v1/public/**
+
+            - id: product-service-private
+              uri: http://localhost:8001
+              predicates:
+                - Path=/product/**
+
+            # Sprint 2026-05-27 — sedcore-notification-service
+            - id: notification-service
+              uri: http://localhost:8004
+              predicates:
+                - Path=/notification/**
+
+# CORS allowed origin listesi (placeholder okumayan globalcors'ın manuel sync'i)
+cors:
+  allowed-origins: >-
+    http://localhost:*,
+    https://www.sedcore.com,
+    https://www.bertspot.com,
+    https://leostok.me,
+    https://www.leostok.me
+
+# JWT base default — dev'de fallback olarak kullanılır.
+# Prod -prod.yml override eder ({cipher} ile).
+jwt:
+  secret: BuCokGizliVeUzunBirAnahtarOlmalidir12345!

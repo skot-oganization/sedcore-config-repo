@@ -1,0 +1,100 @@
+# notification servisi — base/env-agnostic config.
+# Dev override: notification-dev.yml | Prod override: notification-prod.yml
+# Merge sırası: application.yml ← notification.yml ← application-<profile>.yml ← notification-<profile>.yml
+
+server:
+  port: 8004
+  servlet:
+    context-path: /notification
+
+spring:
+  application:
+    name: notification
+
+  datasource:
+    # `currentSchema=notification` — postgres'te ayrı schema; pos-product-manager'ın
+    # public schema'sıyla çakışmasın. Hibernate ddl-auto bu schema'da tablo yaratır.
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ekalem}?currentSchema=notification
+    username: ${DB_USERNAME:ekalem}
+    password: ${DB_PASSWORD:ekalem}
+    driver-class-name: org.postgresql.Driver
+    # Schema yoksa Spring start fail eder — init script'i ile auto-create
+    hikari:
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS notification
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+    # ddl-auto YOK base'de — dev/prod override eder (security paten ile aynı)
+    properties:
+      hibernate:
+        default_schema: notification
+
+# JWT — security/api-manager ile AYNI değer olmalı (gateway'den gelen JwtXUserInfoFilter
+# decode'u için + service-to-service SystemJwtIssuer için).
+jwt:
+  secret: ${JWT_SECRET:BuCokGizliVeUzunBirAnahtarOlmalidir12345!}
+
+# Actuator — config-repo/application.yml base'i + MAIL health KAPALI
+# known-pitfalls: spring-boot-starter-mail classpath'te → MailHealthIndicator
+# sahte SMTP'ye bağlanmaya çalışır → container unhealthy.
+management:
+  health:
+    mail:
+      enabled: false
+
+info:
+  app:
+    name: SEDCORE Notification Service
+    version: 1.0.0
+    description: SMS / Email / WhatsApp / Slack bildirim hub'ı (multi-tenant, multi-channel)
+  company: SEDCORE
+  contact:
+    email: support@sedcore.com
+
+# ════════════════════════════════════════════════════════════════════
+# Mail (SMTP) — EmailChannel için. mail.enabled=false → no-op (log + return false)
+# ════════════════════════════════════════════════════════════════════
+mail:
+  enabled: ${MAIL_ENABLED:false}
+  from: ${MAIL_FROM:noreply@sedcore.com}
+
+# ════════════════════════════════════════════════════════════════════
+# Slack webhook — boş URL → SlackChannel no-op (sadece log)
+# Per-tenant URL `notification_configs` tablosundan da gelebilir (Sprint 30+).
+# ════════════════════════════════════════════════════════════════════
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL:}
+
+# ════════════════════════════════════════════════════════════════════
+# Notification core — @Async retry parametreleri (Sprint 25 paten)
+# ════════════════════════════════════════════════════════════════════
+notification:
+  async:
+    thread-pool:
+      size: 5
+    queue-capacity: 100
+  retry:
+    max-attempts: 3
+    initial-delay-ms: 5000
+    multiplier: 2.0
+  # SMS provider abstraction — noop default (credentials yokken UI/test çalışsın)
+  # twilio | netgsm (Sprint 27+) | iletimerkezi (Sprint 27+)
+  sms:
+    provider: ${NOTIFICATION_SMS_PROVIDER:noop}
+  # WhatsApp provider abstraction — Sprint 2026-05-27 yeni
+  whatsapp:
+    provider: ${NOTIFICATION_WHATSAPP_PROVIDER:noop}
+  # Slack provider abstraction — Sprint 2026-05-27 yeni (webhook default)
+  slack:
+    provider: ${NOTIFICATION_SLACK_PROVIDER:webhook}
+
+# Twilio SDK — SMS + WhatsApp tek SDK
+# Twilio aktive etmek için: notification.sms.provider=twilio (veya whatsapp.provider=twilio)
+# + aşağıdaki 4 değeri doldur (prod'da {cipher})
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  from-phone: ${TWILIO_PHONE_NUMBER:}
+  whatsapp-from: ${TWILIO_WHATSAPP_NUMBER:}

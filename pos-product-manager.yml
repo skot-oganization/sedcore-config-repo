@@ -1,0 +1,59 @@
+# pos-product-manager — base/env-agnostic config
+# K7 (2026-05-27): env-var pattern YOK. DB/mail/twilio/slack -dev/-prod.yml'lerde.
+
+server:
+  port: 8001
+  servlet:
+    context-path: /product
+
+spring:
+  application:
+    # CompanyContext / multi-tenant filter için aynı value
+    name: pos-product-manager
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    # url + username + password env-spesifik — dev/prod yml'lerinde
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+
+# Actuator: pos-product-manager için metrics ek (application.yml base + 'metrics')
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+info:
+  app:
+    name: POS Product Manager Service
+    version: 1.0.0
+    description: RESTful API for POS product management with hybrid recommendations
+  company: SEDCORE
+  contact:
+    email: support@sedcore.com
+
+# Default kapalı switch'ler — env'e bağlı olmayan business behavior
+# Prod yml'ler bunları true yapar
+reconcile:
+  scheduled:
+    enabled: false
+    cron: "0 0 3 * * *"   # her gece 03:00
+
+# Overdue job pos-product-manager'da KALDI (customer/account verisine direkt
+# erişim). Gönderim NotificationClient → notification-service üzerinden.
+overdue:
+  notification:
+    enabled: false
+    cron: "0 0 9 * * MON-FRI"
+
+# Sprint 2026-05-27 — Notification client (sedcore-notification-service HTTP).
+# Tüm SMS/Email/WhatsApp/Slack bildirimleri NotificationClient ile gateway
+# üzerinden notification-service'e gider.
+# KALDIRILDI: mail.*, slack.*, notification.{async,retry,sms,twilio}.*
+# (artık config-repo/notification.yml'de — notification-service kullanır).
+notification:
+  client:
+    base-url: http://api-manager:8080

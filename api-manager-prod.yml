@@ -1,0 +1,34 @@
+# api-manager — PRODUCTION override
+# K7 (2026-05-27): Hardcoded routes (container DNS) + {cipher} JWT. Env-var YOK.
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: security-service
+              uri: http://security:8002
+              predicates:
+                - Path=/security/**
+
+            - id: product-service-public
+              uri: http://pos-product-manager:8001
+              predicates:
+                - Path=/product/api/v1/public/**
+
+            - id: product-service-private
+              uri: http://pos-product-manager:8001
+              predicates:
+                - Path=/product/**
+
+            # Sprint 2026-05-27 — sedcore-notification-service (container DNS)
+            - id: notification-service
+              uri: http://notification-service:8004
+              predicates:
+                - Path=/notification/**
+
+# TODO REPLACE BEFORE PROD DEPLOY: security-prod.yml jwt.secret ile AYNI cipher.
+# Token signing security'de, validation api-manager'da; aynı secret olmazsa 401.
+jwt:
+  secret: '{cipher}REPLACE_BEFORE_PROD_JWT_SECRET'

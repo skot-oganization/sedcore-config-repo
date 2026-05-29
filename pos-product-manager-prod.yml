@@ -1,0 +1,46 @@
+# pos-product-manager — PRODUCTION override
+# K7 (2026-05-27): Hardcoded URL + {cipher} secrets. Env-var pattern YOK.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/ekalem
+    username: ekalem
+    password: '{cipher}REPLACE_BEFORE_PROD_DB_PASSWORD'    # security-prod ile AYNI cipher
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    defer-datasource-initialization: false
+
+  sql:
+    init:
+      mode: never
+
+# Sprint 2026-05-27: spring.mail.*, mail.*, slack.*, notification.{sms,twilio}.*
+# prod blokları kaldırıldı. SMTP/Twilio/Slack credentials notification-prod.yml'de.
+
+# OCR servisi production container DNS
+ocr:
+  service:
+    url: http://ocr-service:8003
+
+# Prod'da reconcile + overdue açık. Gönderim NotificationClient üzerinden.
+reconcile:
+  scheduled:
+    enabled: true
+    cron: "0 0 3 * * *"
+
+overdue:
+  notification:
+    enabled: true
+    cron: "0 0 9 * * MON-FRI"
+
+# Notification client (prod — gateway internal docker DNS).
+notification:
+  client:
+    base-url: http://api-manager:8080
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN

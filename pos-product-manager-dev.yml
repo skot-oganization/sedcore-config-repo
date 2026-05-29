@@ -1,0 +1,30 @@
+# pos-product-manager — DEV profile override
+# Developer makinesi: localhost Postgres, schema auto-update, SQL trace, seed data
+
+spring:
+  # K7 (2026-05-27): Dev DB hardcoded — env-var pattern yok, plaintext OK
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ekalem
+    username: ekalem
+    password: ekalem
+
+  jpa:
+    hibernate:
+      # Dev: schema değişikliği auto-apply (production validate)
+      ddl-auto: update
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+# OCR servisi — dev'de localhost (developer makinesinde manuel boot)
+ocr:
+  service:
+    url: http://localhost:8003
+
+# Dev'de SQL trace + bind parameter log
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

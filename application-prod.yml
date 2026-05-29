@@ -1,0 +1,21 @@
+# Tüm servisler için PRODUCTION override
+
+spring:
+  jpa:
+    # Prod'da DDL otomatik değişiklik YASAK — migration ile yönetilir (gelecek faza)
+    # Şimdilik update; flyway/liquibase eklenince validate yapılacak
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+management:
+  endpoint:
+    health:
+      # Prod'da detay sadece auth'lu istemcilere — info leak önlenir
+      show-details: when-authorized
+
+logging:
+  level:
+    root: WARN
+    com.sedcore: INFO
+    org.hibernate.SQL: WARN

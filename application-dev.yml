@@ -1,0 +1,17 @@
+# Ortak DEV profile override — tüm servisler bunu çeker
+# Aktivasyon: spring.profiles.active=dev
+
+# Dev: detay log seviyesi (tanılama için)
+logging:
+  level:
+    com.sedcore: DEBUG
+    org.springframework.web: INFO
+    # Spring Cloud Config debug — dev'de config-server bağlantı tanılaması için (yorum aç)
+    # org.springframework.cloud.config: DEBUG
+
+management:
+  endpoint:
+    health:
+      # Dev'de tam detay (hangi DB/disk/mail DOWN, açıkça göster)
+      show-details: always
+      show-components: always

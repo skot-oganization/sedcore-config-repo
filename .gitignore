@@ -1,0 +1,10 @@
+# Editör artıkları
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Yanlışlıkla plaintext secret commit'i önlemek için
+# (geçici dosyalar; gerçek yml'ler bu pattern'a uymaz)
+*.secret
+secrets.local.yml

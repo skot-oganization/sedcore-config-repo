@@ -1,0 +1,10 @@
+# api-manager — DEV profile override
+# Gateway routes URI'leri base yml'de env-var fallback (localhost) ile çalışıyor;
+# dev'de ekstra route override gerekmez. Sadece tanılama için log seviyesi.
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.cors: DEBUG
+    # JWT decoder tanılaması — invalid token sorunları için (yorum aç)
+    # org.springframework.security: DEBUG

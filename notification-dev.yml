@@ -1,0 +1,25 @@
+# notification servisi — DEV override
+# Localhost Postgres, ddl-auto=create (her startup tabloları sıfırla), DEBUG log, seed.
+
+spring:
+  jpa:
+    hibernate:
+      # Dev: her boot'ta DROP+CREATE → schema değişikliği refleks olarak yansır
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    com.sedcore.notification: DEBUG
+    org.hibernate.SQL: DEBUG
+    # Twilio SDK çok verbose — DEBUG'da bile WARN'da bırak
+    com.twilio: WARN
