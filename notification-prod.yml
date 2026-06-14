@@ -17,6 +17,13 @@ spring:
     init:
       mode: never
 
+  # S1 (2026-06-14) — RabbitMQ broker connection (prod)
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
   # SMTP — prod'da gerçek mail provider (SendGrid/Mailgun/SMTP relay)
   mail:
     host: ${MAIL_HOST:smtp.sendgrid.net}
@@ -44,8 +51,12 @@ slack:
   webhook:
     url: ${SLACK_WEBHOOK_URL}
 
-# Twilio SMS + WhatsApp prod credentials (TODO Faz 6 {cipher})
+# S1 (2026-06-14) — RabbitMQ delivery mode (prod)
 notification:
+  delivery:
+    mode: queue
+  rabbitmq:
+    dlq-ttl-ms: 86400000  # 24 hours in production
   sms:
     provider: ${NOTIFICATION_SMS_PROVIDER:noop}
   whatsapp:

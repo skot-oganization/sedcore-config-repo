@@ -1,6 +1,13 @@
 # notification servisi — DEV override
 # Localhost Postgres, ddl-auto=create (her startup tabloları sıfırla), DEBUG log, seed.
 
+# S1 (2026-06-14) — Dev overrides for RabbitMQ testing
+notification:
+  delivery:
+    mode: queue  # Force queue for RabbitMQ testing
+  rabbitmq:
+    dlq-ttl-ms: 600000  # 10 minutes in dev (faster testing)
+
 spring:
   jpa:
     hibernate:
