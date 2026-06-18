@@ -1,5 +1,5 @@
 # api-manager — PRODUCTION override
-# K7 (2026-05-27): Hardcoded routes (container DNS) + {cipher} JWT. Env-var YOK.
+# Hardcoded routes (container DNS). JWT secret env var'dan.
 
 spring:
   cloud:
@@ -22,13 +22,10 @@ spring:
               predicates:
                 - Path=/product/**
 
-            # Sprint 2026-05-27 — sedcore-notification-service (container DNS)
             - id: notification-service
               uri: http://notification-service:8004
               predicates:
                 - Path=/notification/**
 
-# TODO REPLACE BEFORE PROD DEPLOY: security-prod.yml jwt.secret ile AYNI cipher.
-# Token signing security'de, validation api-manager'da; aynı secret olmazsa 401.
 jwt:
-  secret: '{cipher}REPLACE_BEFORE_PROD_JWT_SECRET'
+  secret: ${JWT_SECRET}

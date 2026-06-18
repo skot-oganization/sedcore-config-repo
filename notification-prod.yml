@@ -2,34 +2,30 @@
 
 spring:
   datasource:
-    # Prod DB credentials encrypt edilmeli (TODO Faz 6 {cipher} workflow)
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?currentSchema=notification
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}    # TODO Faz 6: '{cipher}...' encrypt et
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=notification
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
 
   jpa:
     hibernate:
-      # Prod: schema sadece validate edilir; auto-update YASAK
-      ddl-auto: validate
+      ddl-auto: update
     defer-datasource-initialization: false
 
   sql:
     init:
       mode: never
 
-  # S1 (2026-06-14) — RabbitMQ broker connection (prod)
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
-  # SMTP — prod'da gerçek mail provider (SendGrid/Mailgun/SMTP relay)
   mail:
     host: ${MAIL_HOST:smtp.sendgrid.net}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:apikey}
-    password: ${MAIL_PASSWORD}    # TODO Faz 6: '{cipher}...'
+    password: ${MAIL_PASSWORD:disabled}
     properties:
       mail:
         smtp:
@@ -37,36 +33,32 @@ spring:
           starttls:
             enable: true
 
-# Prod JWT secret env var'dan; Faz 6'da {cipher} ile encrypt edilecek
 jwt:
-  secret: ${JWT_SECRET}    # TODO Faz 6: '{cipher}...'
+  secret: ${JWT_SECRET}
 
-# Prod'da mail send default açık (mail.enabled=true)
 mail:
-  enabled: ${MAIL_ENABLED:true}
+  enabled: ${MAIL_ENABLED:false}
   from: ${MAIL_FROM:noreply@sedcore.com}
 
-# Prod Slack webhook (Faz 6'da {cipher})
 slack:
   webhook:
-    url: ${SLACK_WEBHOOK_URL}
+    url: ${SLACK_WEBHOOK_URL:disabled}
 
-# S1 (2026-06-14) — RabbitMQ delivery mode (prod)
 notification:
   delivery:
     mode: queue
   rabbitmq:
-    dlq-ttl-ms: 86400000  # 24 hours in production
+    dlq-ttl-ms: 86400000
   sms:
     provider: ${NOTIFICATION_SMS_PROVIDER:noop}
   whatsapp:
     provider: ${NOTIFICATION_WHATSAPP_PROVIDER:noop}
 
 twilio:
-  account-sid: ${TWILIO_ACCOUNT_SID}    # TODO Faz 6: '{cipher}...'
-  auth-token: ${TWILIO_AUTH_TOKEN}      # TODO Faz 6: '{cipher}...'
-  from-phone: ${TWILIO_PHONE_NUMBER}
-  whatsapp-from: ${TWILIO_WHATSAPP_NUMBER}
+  account-sid: ${TWILIO_ACCOUNT_SID:disabled}
+  auth-token: ${TWILIO_AUTH_TOKEN:disabled}
+  from-phone: ${TWILIO_PHONE_NUMBER:disabled}
+  whatsapp-from: ${TWILIO_WHATSAPP_NUMBER:disabled}
 
 logging:
   level:

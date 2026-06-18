@@ -1,32 +1,22 @@
 # security servisi — PRODUCTION override
-# K7 (2026-05-27): Hardcoded URL + {cipher} secrets. Env-var pattern YOK.
-# Compose'ta sadece bootstrap env (SPRING_CONFIG_IMPORT, CONFIG_USER/PASS, fail-fast).
 
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/ekalem
-    username: ekalem
-    # TODO REPLACE BEFORE PROD DEPLOY: production'da config-server up
-    #   curl -u $CONFIG_USER:$CONFIG_PASS -X POST http://config-server:8888/encrypt \
-    #     -H 'Content-Type: text/plain' -d 'gercek_postgres_password'
-    # → cipher değerini aşağıya yapıştır; POSTGRES_PASSWORD .env'deki ile AYNI olmalı
-    password: '{cipher}REPLACE_BEFORE_PROD_DB_PASSWORD'
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
 
   jpa:
     hibernate:
-      # Prod: tablo recreate ASLA — mevcut data korunur
-      ddl-auto: validate
-    # Seed data prod'da çalışmasın
+      ddl-auto: update
     defer-datasource-initialization: false
 
   sql:
     init:
       mode: never
 
-# TODO REPLACE BEFORE PROD DEPLOY: gerçek JWT secret (min 32 char) encrypt et,
-# api-manager-prod.yml'deki AYNI cipher olmalı (token signing/verification eşleşmesi)
 jwt:
-  secret: '{cipher}REPLACE_BEFORE_PROD_JWT_SECRET'
+  secret: ${JWT_SECRET}
 
 logging:
   level:
