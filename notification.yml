@@ -10,6 +10,8 @@ server:
 spring:
   application:
     name: notification
+  main:
+    allow-circular-references: true
 
   datasource:
     # `currentSchema=notification` — postgres'te ayrı schema; pos-product-manager'ın
