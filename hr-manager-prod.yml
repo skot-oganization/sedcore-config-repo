@@ -1,0 +1,26 @@
+# hr-manager — PRODUCTION override
+# Container DNS (postgres), ddl-auto=update (hrm schema), seed yok.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=hrm
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: false
+
+  sql:
+    init:
+      mode: never
+
+jwt:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    com.sedcore: INFO

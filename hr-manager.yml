@@ -1,0 +1,48 @@
+# hr-manager (İnsan Kaynakları) — base/env-agnostic config.
+# Dev override: hr-manager-dev.yml | Prod override: hr-manager-prod.yml
+# Merge sırası: application.yml ← hr-manager.yml ← application-<profile>.yml ← hr-manager-<profile>.yml
+#
+# Port 8005 (notification-service 8004 ile çakışmasın — local-dev gateway route'u
+# localhost:PORT kullanıyor). Schema: hrm (postgres'te izole; product'ın public
+# schema'sıyla çakışmaz). Context-path /hr → tam URL /hr/api/v1/**.
+
+server:
+  port: 8005
+  servlet:
+    context-path: /hr
+
+spring:
+  application:
+    name: hr-manager
+
+  datasource:
+    # currentSchema=hrm — ayrı schema; ddl-auto bu schema'da tablo (employees, hr_*) yaratır.
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ekalem}?currentSchema=hrm
+    username: ${DB_USERNAME:ekalem}
+    password: ${DB_PASSWORD:ekalem}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # Schema yoksa Spring start fail eder — bağlantıda auto-create (notification paten).
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS hrm
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+    # ddl-auto YOK base'de — dev/prod override eder (security/notification paten ile aynı).
+    properties:
+      hibernate:
+        default_schema: hrm
+
+# JWT — security/api-manager ile AYNI değer olmalı (gateway'den gelen JwtXUserInfoFilter
+# decode'u + service-to-service SystemJwtIssuer için).
+jwt:
+  secret: ${JWT_SECRET:BuCokGizliVeUzunBirAnahtarOlmalidir12345!}
+
+info:
+  app:
+    name: SEDCORE HR Manager
+    version: 1.0.0
+    description: İnsan Kaynakları — personel / izin / puantaj / bordro / mesai (multi-tenant)
+  company: SEDCORE
+  contact:
+    email: support@sedcore.com

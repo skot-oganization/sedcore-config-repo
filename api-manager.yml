@@ -56,6 +56,12 @@ spring:
               predicates:
                 - Path=/notification/**
 
+            # Sprint 2026-06-23 — sedcore-hr-manager (İK: personel/izin/puantaj/bordro/mesai)
+            - id: hr-manager-service
+              uri: http://localhost:8005
+              predicates:
+                - Path=/hr/**
+
 # CORS allowed origin listesi (placeholder okumayan globalcors'ın manuel sync'i)
 cors:
   allowed-origins: >-
