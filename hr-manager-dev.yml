@@ -11,6 +11,12 @@ spring:
       hibernate:
         format_sql: true
     defer-datasource-initialization: true
+  # data.sql'i Postgres'te de çalıştır: Spring Boot default 'embedded' yalnız H2'de
+  # çalıştırır → 'always' ile dev Postgres'e de seed (defer ile DDL sonrası). data.sql
+  # ON CONFLICT DO NOTHING içerdiği için her boot idempotent.
+  sql:
+    init:
+      mode: always
 
 # Çalışan↔kullanıcı bağı doğrulaması — SecurityUserClient gateway üzerinden security'ye gider.
 # DEV'de gateway localhost:8080 (prod default: http://api-manager:8080).
