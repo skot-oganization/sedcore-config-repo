@@ -12,6 +12,12 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
 
+# Çalışan↔kullanıcı bağı doğrulaması — SecurityUserClient gateway üzerinden security'ye gider.
+# DEV'de gateway localhost:8080 (prod default: http://api-manager:8080).
+security:
+  client:
+    base-url: http://localhost:8080
+
 logging:
   level:
     com.sedcore: DEBUG
